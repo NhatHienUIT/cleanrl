@@ -257,6 +257,14 @@ poetry run pip install "stable_baselines3==2.0.0a1"
             repo_name = f"{args.env_id}-{args.exp_name}-seed{args.seed}"
             repo_id = f"{args.hf_entity}/{repo_name}" if args.hf_entity else repo_name
             push_to_hub(args, episodic_returns, repo_id, "DQN", f"runs/{run_name}", f"videos/{run_name}-eval")
-
+        if args.capture_video:
+            env = gym.make(args.env_id, render_mode="rgb_array")
+            env = gym.wrappers.RecordVideo(env, f"videos/{run_name}-last", episode_trigger=lambda x: True)
+            obs = env.reset()
+            done = False
+            while not done:
+                q_values = q_network(torch.Tensor([obs]).to(device))
+                action = torch.argmax(q_values, dim=1).cpu().numpy()[0]
+                obs, reward, done, info = env.step(action)
     envs.close()
     writer.close()
