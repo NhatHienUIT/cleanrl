@@ -13,7 +13,7 @@ import torch.optim as optim
 import tyro
 from stable_baselines3.common.buffers import ReplayBuffer
 from torch.utils.tensorboard import SummaryWriter
-
+from gymnasium.experimental.wrappers.rendering import RecordVideoV0 as RecordVideo
 
 @dataclass
 class Args:
@@ -69,7 +69,7 @@ def make_env(env_id, seed, idx, capture_video, run_name):
     def thunk():
         if capture_video and idx == 0:
             env = gym.make(env_id, render_mode="rgb_array")
-            env = gym.wrappers.RecordVideo(env, f"videos/{run_name}")
+            env = RecordVideo(env, f"videos/{run_name}")
         else:
             env = gym.make(env_id)
         env = gym.wrappers.RecordEpisodeStatistics(env)
